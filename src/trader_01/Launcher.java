@@ -22,7 +22,7 @@ public class Launcher {
 	public static final String TARGET_IP = "127.0.0.1";
 	public static final int TARGET_PORT = 34567;
 
-	public static String[] STOCK_NAME_LIST = Util.readStockNameList("src/resources/stock_names_2.txt");;
+	public static String[] STOCK_NAME_LIST = Util.readStockNameList("src/resources/stock_names.txt");;
 	public static int[] TRADE_INFO_RECEIVER_PORT_NUMBER_LIST = { 20001, 20002, 20003, 20004, 20005 };
 	public static String[] TRADE_INFO_RECEIVER_THREAD_NAME_LIST = { "TradeInfoReceiver_1", "TradeInfoReceiver_2",
 			"TradeInfoReceiver_3", "TradeInfoReceiver_4", "TradeInfoReceiver_5" };
@@ -45,12 +45,13 @@ public class Launcher {
 					TRADE_INFO_RECEIVER_THREAD_NAME_LIST[i]), TRADE_INFO_RECEIVER_THREAD_NAME_LIST[i]));
 		}
 
-		for (String stockName : STOCK_NAME_LIST) {
-			threadList.add(new Thread(new PriceInfoHandler(stockName), "th_" + stockName));
+		for (int i = 0; i < STOCK_NAME_LIST.length; i++) {
+			threadList.add(new Thread(new PriceInfoHandler(STOCK_NAME_LIST[i]),
+					"th_" + STOCK_NAME_LIST[i] + "_"+String.format("%04d", i)));
 		}
 
 		threadList.add(new Thread(new OrderIssuer(), "OrderIssuer"));
-		threadList.get(threadList.size() - 1).setPriority(1);
+//		threadList.get(threadList.size() - 1).setPriority(1);
 
 		for (Thread t : threadList) {
 			t.start();
@@ -59,7 +60,7 @@ public class Launcher {
 		}
 
 		try {
-			for (Thread t : threadList){
+			for (Thread t : threadList) {
 				t.join();
 				System.out.println("thread [" + t.getName() + "] joined.");
 			}
