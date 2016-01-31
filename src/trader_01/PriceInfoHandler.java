@@ -17,44 +17,47 @@ public class PriceInfoHandler implements Runnable {
 
 	@Override
 	public void run() {
-		TradeInfoEty tiEty = Launcher.TRADE_INFO_Q_HASH.get(stockName).poll();
+		while (true) {
+			TradeInfoEty tiEty = Launcher.TRADE_INFO_Q_HASH.get(stockName).poll();
+			if (tiEty != null) {
+				OrderInfoEty oie = null;
+				if (tiEty.getCurrentPrice() < 1.0d || tiEty.getCurrentPrice() > 2.0d) {
+					// 최근 거래가격이 1.0 미만이거나 2.0 초과이면 다음을 수행하여 보유수량을 0으로 맞춘다
+					// (이 때 거래 내역 수집은 하지 않는다)
+					// - 현재 보유수량이 양수이면 매도가격 1에 전량을 매도
+					// - 현재 보유수량이 음수이면 매수가격 1에 (현재수량 * -1)만큼을 매수
+					int tradeQty = 0;
+					if (stockQty > 0)
+						tradeQty = stockQty;
+					else if (stockQty < 0)
+						tradeQty = stockQty * -1;
 
-		OrderInfoEty oie = null;
-		if (tiEty.getCurrentPrice() < 1.0d || tiEty.getCurrentPrice() > 2.0d) {
-			// 최근 거래가격이 1.0 미만이거나 2.0 초과이면 다음을 수행하여 보유수량을 0으로 맞춘다
-			// (이 때 거래 내역 수집은 하지 않는다)
-			// - 현재 보유수량이 양수이면 매도가격 1에 전량을 매도
-			// - 현재 보유수량이 음수이면 매수가격 1에 (현재수량 * -1)만큼을 매수
-			int tradeQty = 0;
-			if (stockQty > 0)
-				tradeQty = stockQty;
-			else if (stockQty < 0)
-				tradeQty = stockQty * -1;
+					oie = createSellInfo("NEW", stockName, tradeQty, 1, tiEty.getTradeId());
+					Launcher.ORDER_INFO_Q.add(oie);
+					System.out.println("put data to ORDER_INFO_Q!! at if");
+					stockQty = 0;
+				} else {
+					// 가격이 1.0 이상 2.0 이하의 범위이면 거래 내역을 수집하고 다음을 수행한다
+					// (거래 내역은 최근 15개만 수집하고 15개 초과 내역은 버린다)
+					// 최근 1~5번째 거래내역과 1~15번째 거래내역의 가중평균을 계산한다
+					// 1~5번의 가중평균이 1~15번의 가중평균 초과시 매수가격 1에 1개를 BUY
+					// 1~5번의 가중평균이 1~15번의 가중평균 이하시 매도가격 1에 1개를 SELL
+					collectTradeInfoHistory(tiEty);
 
-			oie = createSellInfo("NEW", stockName, tradeQty, 1, tiEty.getTradeId());
-			Launcher.ORDER_INFO_Q.add(oie);
-			System.out.println("put data to ORDER_INFO_Q!!");
-			stockQty = 0;
-		} else {
-			// 가격이 1.0 이상 2.0 이하의 범위이면 거래 내역을 수집하고 다음을 수행한다
-			// (거래 내역은 최근 15개만 수집하고 15개 초과 내역은 버린다)
-			// 최근 1~5번째 거래내역과 1~15번째 거래내역의 가중평균을 계산한다
-			// 1~5번의 가중평균이 1~15번의 가중평균 초과시 매수가격 1에 1개를 BUY
-			// 1~5번의 가중평균이 1~15번의 가중평균 이하시 매도가격 1에 1개를 SELL
-			collectTradeInfoHistory(tiEty);
-
-			if (getWeightedAvg5() > getWeightedAvg15()) {
-				// 1~5번의 가중평균이 1~15번의 가중평균 초과시 매수가격 1에 1개를 BUY
-				oie = createBuyInfo("NEW", stockName, 1, 1, tiEty.getTradeId());
-				Launcher.ORDER_INFO_Q.add(oie);
-				System.out.println("put data to ORDER_INFO_Q!!");
-				stockQty++;
-			} else {
-				// 1~5번의 가중평균이 1~15번의 가중평균 이하시 매도가격 1에 1개를 SELL
-				oie = createSellInfo("NEW", stockName, 1, 1, tiEty.getTradeId());
-				Launcher.ORDER_INFO_Q.add(oie);
-				System.out.println("put data to ORDER_INFO_Q!!");
-				stockQty--;
+					if (getWeightedAvg5() > getWeightedAvg15()) {
+						// 1~5번의 가중평균이 1~15번의 가중평균 초과시 매수가격 1에 1개를 BUY
+						oie = createBuyInfo("NEW", stockName, 1, 1, tiEty.getTradeId());
+						Launcher.ORDER_INFO_Q.add(oie);
+						System.out.println("put data to ORDER_INFO_Q!! at if if");
+						stockQty++;
+					} else {
+						// 1~5번의 가중평균이 1~15번의 가중평균 이하시 매도가격 1에 1개를 SELL
+						oie = createSellInfo("NEW", stockName, 1, 1, tiEty.getTradeId());
+						Launcher.ORDER_INFO_Q.add(oie);
+						System.out.println("put data to ORDER_INFO_Q!! at if else");
+						stockQty--;
+					}
+				}
 			}
 		}
 	}

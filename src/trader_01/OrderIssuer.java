@@ -30,7 +30,7 @@ public class OrderIssuer implements Runnable {
 					else
 						orderMsg = (orderMsgLength + 3) + orderMsg;
 					dos.writeUTF(orderMsg);
-					System.out.println("order sent: " + oie.getCode());
+					System.out.println("order sent: " + oie.toString());
 				}
 			}
 		} catch (IOException e) {

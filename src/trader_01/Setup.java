@@ -8,7 +8,7 @@ import sub.TradeInfoEty;
 
 public class Setup {
 	public HashMap<String, Queue<TradeInfoEty>> generateTradeInfoQueueHash(String[] stockNameList) {
-		HashMap<String, Queue<TradeInfoEty>> h = new HashMap<String, Queue<TradeInfoEty>>(1100);
+		HashMap<String, Queue<TradeInfoEty>> h = new HashMap<String, Queue<TradeInfoEty>>(Launcher.DEFAULT_NUM_OF_STOCK);
 		for (String stockName : stockNameList) {
 			if (h.get(stockName) == null)
 				h.put(stockName, new LinkedList<TradeInfoEty>());
