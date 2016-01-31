@@ -64,14 +64,14 @@ public class PriceInfoHandler implements Runnable {
 
 	// 가장 오래된 거래내역을 버리고 최근 거래내역을 수집한다
 	private void collectTradeInfoHistory(TradeInfoEty tiEty) {
-		if (idxPointer == Launcher.NUM_OF_BIG_SAMPLE)
-			idxPointer = 0;
-		else
-			idxPointer++;
-
 		tradePrice[idxPointer] = tiEty.getCurrentPrice();
 		tradeQty[idxPointer] = tiEty.getTradeQty();
 		multiplied[idxPointer] = tradePrice[idxPointer] * tradeQty[idxPointer];
+
+		if (idxPointer == Launcher.NUM_OF_BIG_SAMPLE - 1)
+			idxPointer = 0;
+		else
+			idxPointer++;
 	}
 
 	private double getWeightedAvg5() {

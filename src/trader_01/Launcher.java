@@ -30,6 +30,7 @@ public class Launcher {
 	public static void main(String[] args) {
 		setupProgram();
 		runProgram();
+		System.out.println("end of main...");
 	}
 
 	private static void setupProgram() {
@@ -49,16 +50,19 @@ public class Launcher {
 		}
 
 		threadList.add(new Thread(new OrderIssuer(), "OrderIssuer"));
+		threadList.get(threadList.size() - 1).setPriority(1);
 
 		for (Thread t : threadList) {
-
 			t.start();
+			System.out.println(t.getState());
 			System.out.println("thread [" + t.getName() + "] started.");
 		}
 
 		try {
-			for (Thread t : threadList)
+			for (Thread t : threadList){
 				t.join();
+				System.out.println("thread [" + t.getName() + "] joined.");
+			}
 		} catch (InterruptedException e) {
 			System.out.println("Thread join Interrupted!!!");
 			e.printStackTrace();

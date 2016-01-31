@@ -50,4 +50,12 @@ public class OrderInfoEty {
 	public int getFeedId() {
 		return feedId;
 	}
+
+	@Override
+	public String toString() {
+		return "OrderInfoEty [length=" + length + ", orderNumber=" + orderNumber + ", action=" + action + ", code="
+				+ code + ", buySell=" + buySell + ", qty=" + qty + ", price=" + price + ", feedId=" + feedId + "]";
+	}
+	
+	
 }
