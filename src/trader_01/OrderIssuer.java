@@ -20,14 +20,19 @@ System.out.println("Socket socket;");
 			System.out.println("OutputStream os = socket.getOutputStream();");
 			DataOutputStream dos = new DataOutputStream(os);
 			System.out.println("DataOutputStream dos = new DataOutputStream(os);");
+		System.out.println("sleep...");
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.out.println("end sleep.");
+//			int fuck = 3;
 			while (true) {
-				System.out.println("whlie");
-				try {
-					Thread.sleep(300);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				if(fuck > 0){
+//					System.out.println("whlie");
+//					fuck--;
+//				}
 				OrderInfoEty oie = Launcher.ORDER_INFO_Q.poll();
 				if (oie != null) {
 					int orderNo = getOrderNo();
@@ -41,7 +46,6 @@ System.out.println("Socket socket;");
 					else
 						orderMsg = (orderMsgLength + 3) + orderMsg;
 					dos.writeUTF(orderMsg);
-					System.out.println("order sent: " + oie.toString());
 					System.out.println("order sent: " + orderMsg);
 				}
 			}
